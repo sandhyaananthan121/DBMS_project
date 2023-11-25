@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState }  from 'react'
  import './App.css';
- import 
- { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } 
- from 'recharts';
+ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 
 function Q3() {
     const [startDate, setStartDate] = useState('');
@@ -91,25 +90,23 @@ function Q3() {
 
         <div className='charts'>
             <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-            width={500}
-            height={300}
-            data={data}
-            margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-            }}
-            >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="pv" fill="#8884d8" />
-                <Bar dataKey="uv" fill="#82ca9d" />
-                </BarChart>
+            <AreaChart
+          width={500}
+          height={400}
+          data={data}
+          margin={{
+            top: 10,
+            right: 30,
+            left: 0,
+            bottom: 0,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Area type="monotone" dataKey="uv" stroke="#8884d8" fill="#8884d8" />
+        </AreaChart>
             </ResponsiveContainer>
             
         <form className='form-container'>
