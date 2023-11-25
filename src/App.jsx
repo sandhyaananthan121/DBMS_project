@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Home from './Home';
 import Login from './Login';
-import Q2 from './q2';
+import Q2 from './Q2';
 
 function App() {
   const [openSidebarToggle, setOpenSidebarToggle] = useState(false);
@@ -27,7 +27,7 @@ function App() {
             </div>
           </>
         )} />
-        <Route path="/" render={() => (
+        <Route path="/q1" render={() => (
             <>
             <div className='grid-container'>
               <Header OpenSidebar={OpenSidebar} />
@@ -38,7 +38,7 @@ function App() {
           )} />
         <Route path="/q2" component={() => (
             <>
-            <div className='grid-container1'>
+            <div className='grid-container'>
               <Header OpenSidebar={OpenSidebar} />
               <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
               <Q2 />

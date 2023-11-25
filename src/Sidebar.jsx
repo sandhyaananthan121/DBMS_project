@@ -17,7 +17,7 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
 
         <ul className='sidebar-list'>
             <li className='sidebar-list-item'>
-                <Link to="/" className="home-link">
+                <Link to="/q1" className="home-link">
                     <p> CO2 Produced by each sector </p>
                 </Link>
             </li>
