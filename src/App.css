@@ -330,18 +330,20 @@ button {
 }
 
 .ReactModal__Content {
-  background-color: #1d2634; /* Modal background color */
-  color: #9e9ea4; /* Modal text color */
+  background-color: #8498ac; /* Modal background color */
+  color: #141422; /* Modal text color */
   border: none; /* Remove border */
   border-radius: 8px; /* Rounded corners */
   outline: none; /* Remove focus outline */
-  padding: 15px; /* Adjust padding as needed */
+  padding: 5px; /* Adjust padding as needed */
   max-width: 300px; /* Set maximum width */
   width: 80%; /* Adjust width as needed */
   max-height: 250px; /* Set maximum height */
   overflow-y: auto; /* Enable vertical scrolling */
   font-size: 18px; /* Increase font size */
-  text-align: center; /* Center align text */
+  text-align: center;
+  justify-content: center;
+  align-items: center; /* Center align text */
 }
 
 /* Medium <= 992px */

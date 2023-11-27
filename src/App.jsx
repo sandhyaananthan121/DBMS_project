@@ -32,15 +32,7 @@ function App() {
             </div>
           </>
         )} />
-          <Route path="/q1"  render={() => (
-            <>
-            <div className='grid-container'>
-              <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Home />
-            </div>
-            </>
-          )} />
+          
         <Route path="/q2" component={() => (
             <>
             <div className='grid-container'>
@@ -83,6 +75,15 @@ function App() {
               <Header OpenSidebar={OpenSidebar} />
               <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
               <Q6 />
+            </div>
+            </>
+          )} />
+          <Route path="/"  render={() => (
+            <>
+            <div className='grid-container'>
+              <Header OpenSidebar={OpenSidebar} />
+              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+              <Home />
             </div>
             </>
           )} />
