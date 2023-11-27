@@ -1,12 +1,34 @@
-import React from 'react'
+import React , { useState, useEffect } from 'react'
 import 
 {BsCart3, BsGrid1X2Fill, BsFillArchiveFill, BsFillGrid3X3GapFill, BsPeopleFill, 
   BsListCheck, BsMenuButtonWideFill, BsFillGearFill, BsGlobeAmericas}
  from 'react-icons/bs'
  import { Link } from 'react-router-dom';
+ import PopupMessage from './PopupMessage';
 
 function Sidebar({openSidebarToggle, OpenSidebar}) {
+    const [data, setData] = useState([]);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    const fetchDataFromBackend = () => {
+        fetch('http://localhost:3001/total') // Replace with your actual backend endpoint
+          .then(response => response.json())
+          .then(data => {
+            setData(data);
+            setIsPopupOpen(true); // Display the fetched data
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+          });
+      };
+    
+      const handleButtonClick = () => {
+        console.log('Button clicked');
+        fetchDataFromBackend();
+      };
+
   return (
+    
     <aside id="sidebar" className={openSidebarToggle ? "sidebar-responsive": ""}>
         <div className='sidebar-title'>
             <div className='sidebar-brand'>
@@ -46,6 +68,14 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
                     <p>Co2 Emissions vs the Environmental Tax imposed on Each Country</p>
                 </Link>
             </li>
+            <li className='sidebar-list-item'>
+                <button onClick={handleButtonClick}>Get Total Tuples</button>
+            </li>
+            <PopupMessage
+            isOpen={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+            data={data}
+            />
         </ul>
     </aside>
   )

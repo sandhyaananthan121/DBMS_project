@@ -6,6 +6,15 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
+button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-bottom: 50px;
+}
 .icon {
   vertical-align: middle;
   line-height: 1px;
@@ -303,6 +312,36 @@ body {
 
 .login-box button:hover {
   background-color: #0056b3;
+}
+/* Updated styles for the modal */
+
+/* Modal */
+.ReactModal__Overlay {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ReactModal__Overlay--after-open {
+  opacity: 1;
+}
+
+.ReactModal__Content {
+  background-color: #1d2634; /* Modal background color */
+  color: #9e9ea4; /* Modal text color */
+  border: none; /* Remove border */
+  border-radius: 8px; /* Rounded corners */
+  outline: none; /* Remove focus outline */
+  padding: 15px; /* Adjust padding as needed */
+  max-width: 300px; /* Set maximum width */
+  width: 80%; /* Adjust width as needed */
+  max-height: 250px; /* Set maximum height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  font-size: 18px; /* Increase font size */
+  text-align: center; /* Center align text */
 }
 
 /* Medium <= 992px */
