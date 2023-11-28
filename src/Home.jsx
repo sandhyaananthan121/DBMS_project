@@ -5,28 +5,53 @@ import React, { useState } from 'react'
  from 'recharts';
 
 function Home() {
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [selectedCountry, setSelectedCountry] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [sector, setSector] = useState('');
+  const [chartData, setChartData] = useState([]);
 
-    const handleStartDateChange = (e) => {
-        setStartDate(e.target.value);
-    };
+  const handleStartDateChange = (e) => {
+    setStartDate(e.target.value);
+  };
 
-    const handleEndDateChange = (e) => {
-        setEndDate(e.target.value);
-    };
+  const handleEndDateChange = (e) => {
+    setEndDate(e.target.value);
+  };
 
-    const handleCountryChange = (e) => {
-        setSelectedCountry(e.target.value);
-    };
+  const handleCountryChange = (e) => {
+    setSelectedCountry(e.target.value);
+  };
+  const handleSector = (e) => {
+    setSector(e.target.value);
+  };
 
-    const handleApplyClick = (e) => {
-        e.preventDefault();
-        console.log('Selected Country:', selectedCountry);
-        console.log('Start Date:', startDate);
-        console.log('End Date:', endDate);
-    };
+  const handleApplyClick = (e) => {
+    e.preventDefault();
+    console.log('Selected Country:', selectedCountry);
+    console.log('Start Date:', startDate);
+    console.log('End Date:', endDate);
+
+    // Make an API call with selected data
+    fetch(`http://localhost:3001/q1?selectedCountry=${selectedCountry}&startDate=${startDate}&endDate=${endDate}&sector=${sector}`)
+      .then((response) => response.json())
+      .then((data) => {
+          const sortedData = [...data].sort(
+            (a, b) => new Date(b.date) - new Date(a.date)
+          );
+          setChartData(sortedData);
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  const transformDataForChart = (data) => {
+    return data.map(([value, date]) => ({
+      value,
+      date,
+    }));
+  };
 
     // Perform some action with the selected data, e.g., make an API call
     
@@ -94,7 +119,7 @@ function Home() {
             <BarChart
             width={500}
             height={300}
-            data={data}
+            data={transformDataForChart(chartData)}
             margin={{
                 top: 5,
                 right: 30,
@@ -103,12 +128,11 @@ function Home() {
             }}
             >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="date" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="pv" fill="#8884d8" />
-                <Bar dataKey="uv" fill="#82ca9d" />
+                <Bar dataKey="value" fill="#8884d8" />
                 </BarChart>
             </ResponsiveContainer>
             
@@ -148,6 +172,24 @@ function Home() {
             className='form-date-input'
           />
             <br></br>
+            <label htmlFor="sectorSelector" className='form-label'>Sector:</label>
+            <select
+            id="sectorSelector"
+            name="sector"
+            onChange={handleSector}
+            value={sector}
+            className="form-select"
+          >
+            <option value="">Select Sector</option>
+            <option value="Power">Power</option>
+            <option value="Residential">Residential</option>
+            <option value="International Aviation">International Aviation</option>
+            <option value="Ground Transport">Ground Transport</option>
+            <option value="Domestic Aviation">Domestic Aviation</option>
+            <option value="Industry">Industry</option>
+            {/* Add more country options here */}
+          </select>
+          <br></br>
           <button type="submit" onClick={handleApplyClick} className='form-button'>
             Apply
           </button>

@@ -10,7 +10,7 @@ function Header() {
         <BsJustify className="icon" />
       </div>
       <div className="header-left">
-        <Link to="/q1" className="home-link">
+        <Link to="/" className="home-link">
           <BsHouseExclamation className="icon" /> Home
         </Link>
       </div>
