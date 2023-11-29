@@ -64,12 +64,7 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
                 </Link>
             </li>
             <li className='sidebar-list-item'>
-                <Link to="/q6" className="home-link">
-                    <p>Co2 Emissions vs the Environmental Tax imposed on Each Country</p>
-                </Link>
-            </li>
-            <li className='sidebar-list-item'>
-                <button onClick={handleButtonClick}>Get Total Tuples</button>
+                <button onClick={handleButtonClick}>Get Total Number of Tupes Across Data</button>
             </li>
             <PopupMessage
             isOpen={isPopupOpen}

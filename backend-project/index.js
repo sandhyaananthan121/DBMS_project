@@ -58,6 +58,681 @@ app.get('/q1', async (req, res) => {
     }
   });
 
+  app.get('/q1/country', async (req, res) => {
+    try {
+      // Your code to fetch data from Oracle DB
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute('select distinct(country) from co2_sectorwise');
+      await connection.close();
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/q1/sector', async (req, res) => {
+    try {
+      // Your code to fetch data from Oracle DB
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute('select distinct(sector) from co2_sectorwise');
+      await connection.close();
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  
+
+  app.get('/q1/main', async (req, res) => {
+    try {
+      // Extract query parameters from the request URL
+      let {  selectedCountry, sector } = req.query;
+  
+      // Modify your SQL query using the extracted parameters
+      const query = `WITH SectorEmissions AS (
+        SELECT
+            CO2_SECTORWISE.COUNTRY,
+            CO2_SECTORWISE.YEAR,
+            CO2_SECTORWISE.SECTOR,
+            SUM(CO2_SECTORWISE.VALUE) AS SECTOR_CO2_EMISSION
+            --SUM(SUM(CO2_SECTORWISE.VALUE)) OVER (PARTITION BY CO2_SECTORWISE.COUNTRY, CO2_SECTORWISE.YEAR) AS TOTAL_EMISSIONS_YEAR
+        FROM
+            CO2_SECTORWISE
+        GROUP BY
+            CO2_SECTORWISE.COUNTRY,
+            CO2_SECTORWISE.YEAR,
+            CO2_SECTORWISE.SECTOR
+    ),
+    TotalEmissions AS (
+        SELECT
+            COUNTRY,
+            YEAR,
+            SUM(SECTOR_CO2_EMISSION) AS TOTAL_EMISSIONS
+        FROM
+            SectorEmissions
+        GROUP BY
+            COUNTRY,
+            YEAR
+    )
+    ,FinalCte AS (
+        SELECT
+        SE.COUNTRY,
+        SE.YEAR,
+        SE.SECTOR,
+        SE.SECTOR_CO2_EMISSION,
+        TE.TOTAL_EMISSIONS,
+        (SE.SECTOR_CO2_EMISSION / TE.TOTAL_EMISSIONS) * 100 AS SECTOR_CONTRIBUTION_PERCENTAGE
+        --SE.SECTOR_CO2_EMISSION - LAG(SE.SECTOR_CO2_EMISSION) OVER (PARTITION BY SE.COUNTRY, SE.SECTOR ORDER BY SE.YEAR) AS PREVIOUS_YEAR_SECTOR_EMISSION
+    FROM
+        SectorEmissions SE
+    JOIN
+        TotalEmissions TE ON SE.COUNTRY = TE.COUNTRY AND SE.YEAR = TE.YEAR
+    ORDER BY
+        SE.COUNTRY,
+        SE.YEAR,
+        SE.SECTOR)
+    SELECT Year,
+    SECTOR_CONTRIBUTION_PERCENTAGE as sp
+    FROM FinalCte
+    where  country='${selectedCountry}' 
+      AND sector = '${sector}'
+      `;
+
+  
+      // Your code to fetch data from Oracle DB using the modified query
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(query);
+      await connection.close();
+  
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
+  app.get('/q2', async (req, res) => {
+    try {
+      // Your code to fetch data from Oracle DB
+      let {val} = req.query;
+      const connection = await oracledb.getConnection(dbConfig);
+      let result = await connection.execute(`WITH PopulationGrowth AS (
+        SELECT
+            P1.COUNTRY,
+            P1.YEAR,
+            P1.VALUE AS POPULATION,
+            ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH
+        FROM
+            POPULATION P1
+        JOIN
+            POPULATION P0 ON P1.COUNTRY = P0.COUNTRY AND P1.YEAR = P0.YEAR + 1
+    ),
+    CO2Emission AS (
+        SELECT
+            C.COUNTRY,
+            C.YEAR,
+            SUM(C.VALUE) AS CO2_EMISSION
+        FROM
+            CO2_GREENHOUSE C
+        GROUP BY C.COUNTRY,C.YEAR
+    )
+    , POpulationCO2 AS (
+        SELECT DISTINCT
+        PG.COUNTRY,
+        PG.YEAR,
+        PG.POPULATION_GROWTH,
+        CE.CO2_EMISSION
+    FROM
+        PopulationGrowth PG
+    JOIN
+        CO2Emission CE ON PG.COUNTRY = CE.COUNTRY AND PG.YEAR = CE.YEAR
+    ORDER BY
+        PG.COUNTRY, PG.YEAR)
+    , RateChange AS (
+        SELECT 
+        COUNTRY,
+        YEAR,
+        POPULATION_GROWTH,
+        CO2_EMISSION,
+        LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag,
+        POPULATION_GROWTH - LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange,
+        LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Lag,
+        CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
+        FROM POpulationCO2
+    )
+    SELECT 
+    distinct(${val})
+    FROM RateChange`);
+  
+      await connection.close();
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+
+  app.get('/q2/main', async (req, res) => {
+    try {
+      // Extract query parameters from the request URL
+      let {  selectedCountry, selectedStartYear, selectedEndYear } = req.query;
+      if (isNaN(selectedStartYear) || isNaN(selectedEndYear)) {
+        res.status(400).json({ error: 'Invalid year format' });
+        return;
+      }
+      
+  
+      // Modify your SQL query using the extracted parameters
+      const query = `WITH PopulationGrowth AS (
+        SELECT
+            P1.COUNTRY,
+            P1.YEAR,
+            P1.VALUE AS POPULATION,
+            ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH
+        FROM
+            POPULATION P1
+        JOIN
+            POPULATION P0 ON P1.COUNTRY = P0.COUNTRY AND P1.YEAR = P0.YEAR + 1
+    ),
+    CO2Emission AS (
+        SELECT
+            C.COUNTRY,
+            C.YEAR,
+            SUM(C.VALUE) AS CO2_EMISSION
+        FROM
+            CO2_GREENHOUSE C
+        GROUP BY C.COUNTRY,C.YEAR
+    )
+    , POpulationCO2 AS (
+        SELECT DISTINCT
+        PG.COUNTRY,
+        PG.YEAR,
+        PG.POPULATION_GROWTH,
+        CE.CO2_EMISSION
+    FROM
+        PopulationGrowth PG
+    JOIN
+        CO2Emission CE ON PG.COUNTRY = CE.COUNTRY AND PG.YEAR = CE.YEAR
+    ORDER BY
+        PG.COUNTRY, PG.YEAR)
+    , RateChange AS (
+        SELECT 
+        COUNTRY,
+        YEAR,
+        POPULATION_GROWTH,
+        CO2_EMISSION,
+        LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag,
+        POPULATION_GROWTH - LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange,
+        LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Lag,
+        CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
+        FROM POpulationCO2
+    )
+    SELECT Year,
+    CO2_EMISSION,
+    Population_Growth*1000000 as Population_growth
+    FROM RateChange
+    where  country='${selectedCountry}'
+    AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}'
+    and PopulationChange<0
+    and CO2Change<0
+    and PopulationChange is NOT NULL
+    AND CO2Change IS NOT NULL
+
+      `;
+
+  
+      // Your code to fetch data from Oracle DB using the modified query
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(query);
+      await connection.close();
+  
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
+// Q3
+
+
+app.get('/q3', async (req, res) => {
+    try {
+      // Your code to fetch data from Oracle DB
+      let {val} = req.query;
+      const connection = await oracledb.getConnection(dbConfig);
+      let result = await connection.execute(`WITH CO2TaxData AS (
+        SELECT distinct 
+            CG.COUNTRY,
+            CG.YEAR,
+            CG.VALUE AS CO2_EMISSION,
+            ET.EMISSIONS_TAXED,
+            (
+                SELECT MAX(PREVIOUS_CO2.VALUE)
+                FROM CO2_GREENHOUSE PREVIOUS_CO2
+                WHERE PREVIOUS_CO2.COUNTRY = CG.COUNTRY
+                AND PREVIOUS_CO2.YEAR = CG.YEAR - 1
+            ) AS PREVIOUS_CO2_EMISSION,
+            (
+                SELECT MAX(PREVIOUS_TAX.EMISSIONS_TAXED)
+                FROM ENVIRONMENTAL_TAX PREVIOUS_TAX
+                WHERE PREVIOUS_TAX.COUNTRY = ET.COUNTRY
+                AND PREVIOUS_TAX.YEAR = ET.YEAR - 1
+            ) AS PREVIOUS_EMISSIONS_TAXED
+        FROM
+            CO2_GREENHOUSE CG
+        JOIN
+            ENVIRONMENTAL_TAX ET ON CG.COUNTRY = ET.COUNTRY AND CG.YEAR = ET.YEAR
+    )
+    , TotalEmissionTax AS (
+        SELECT distinct
+        COUNTRY,
+        YEAR,
+        SUM(CO2_EMISSION) AS TotalCO2_EMISSION,
+        SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED
+    FROM
+        CO2TaxData
+    GROUP BY
+        COUNTRY, YEAR
+    ), RateChange AS (
+        SELECT distinct 
+        c.COUNTRY,
+        c.YEAR,
+        TotalCO2_EMISSION,
+        PREVIOUS_CO2_EMISSION,
+        TotalEMISSIONS_TAXED,
+        PREVIOUS_EMISSIONS_TAXED,
+        TotalCO2_EMISSION - PREVIOUS_CO2_EMISSION AS CO2_EMISSION_CHANGE,
+        TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE
+    FROM
+        CO2TaxData c
+        JOIN TotalEmissionTax t
+        on c.country=t.country and c.year=t.year
+    ORDER BY
+        COUNTRY, YEAR
+    ), CorrValue AS (
+        SELECT YEAR,COUNTRY
+        ,CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
+        FROM RateChange
+        WHERE
+        CO2_EMISSION_CHANGE is not null
+        and tax_change is not null
+    )
+    SELECT
+    distinct(${val})
+    FROM CorrValue
+    `);
+  
+      await connection.close();
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+
+  app.get('/q3/main', async (req, res) => {
+    try {
+      // Extract query parameters from the request URL
+      let {  selectedCountry, selectedStartYear, selectedEndYear } = req.query;
+      if (isNaN(selectedStartYear) || isNaN(selectedEndYear)) {
+        res.status(400).json({ error: 'Invalid year format' });
+        return;
+      }
+      
+  
+      // Modify your SQL query using the extracted parameters
+      const query = `WITH CO2TaxData AS (
+        SELECT distinct 
+            CG.COUNTRY,
+            CG.YEAR,
+            CG.VALUE AS CO2_EMISSION,
+            ET.EMISSIONS_TAXED,
+            (
+                SELECT MAX(PREVIOUS_CO2.VALUE)
+                FROM CO2_GREENHOUSE PREVIOUS_CO2
+                WHERE PREVIOUS_CO2.COUNTRY = CG.COUNTRY
+                AND PREVIOUS_CO2.YEAR = CG.YEAR - 1
+            ) AS PREVIOUS_CO2_EMISSION,
+            (
+                SELECT MAX(PREVIOUS_TAX.EMISSIONS_TAXED)
+                FROM ENVIRONMENTAL_TAX PREVIOUS_TAX
+                WHERE PREVIOUS_TAX.COUNTRY = ET.COUNTRY
+                AND PREVIOUS_TAX.YEAR = ET.YEAR - 1
+            ) AS PREVIOUS_EMISSIONS_TAXED
+        FROM
+            CO2_GREENHOUSE CG
+        JOIN
+            ENVIRONMENTAL_TAX ET ON CG.COUNTRY = ET.COUNTRY AND CG.YEAR = ET.YEAR
+    )
+    , TotalEmissionTax AS (
+        SELECT distinct
+        COUNTRY,
+        YEAR,
+        SUM(CO2_EMISSION) AS TotalCO2_EMISSION,
+        SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED
+    FROM
+        CO2TaxData
+    GROUP BY
+        COUNTRY, YEAR
+    ), RateChange AS (
+        SELECT distinct 
+        c.COUNTRY,
+        c.YEAR,
+        TotalCO2_EMISSION,
+        PREVIOUS_CO2_EMISSION,
+        TotalEMISSIONS_TAXED,
+        PREVIOUS_EMISSIONS_TAXED,
+        TotalCO2_EMISSION - PREVIOUS_CO2_EMISSION AS CO2_EMISSION_CHANGE,
+        TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE
+    FROM
+        CO2TaxData c
+        JOIN TotalEmissionTax t
+        on c.country=t.country and c.year=t.year
+    ORDER BY
+        COUNTRY, YEAR
+    ), CorrValue AS (
+        SELECT YEAR,COUNTRY
+        ,CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
+        FROM RateChange
+        WHERE
+        CO2_EMISSION_CHANGE is not null
+        and tax_change is not null
+    )
+    SELECT YEAR,
+    CO2_TAX_CORRELATION
+    FROM CorrValue
+    WHERE COUNTRY= '${selectedCountry}'
+        AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}'
+        AND CO2_TAX_CORRELATION IS NOT NULL
+    `;
+
+  
+      // Your code to fetch data from Oracle DB using the modified query
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(query);
+      await connection.close();
+  
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Q4
+
+  app.get('/q4', async (req, res) => {
+    try {
+      // Your code to fetch data from Oracle DB
+      let {val} = req.query;
+      const connection = await oracledb.getConnection(dbConfig);
+      let result = await connection.execute(`WITH CO2_GDP AS (
+        SELECT
+          CG.COUNTRY,
+          CG.YEAR,
+          SUM(CG.VALUE) AS CO2_EMISSION,
+          SUM(GDP.VALUE) AS GDP_VALUE
+        FROM
+          CO2_GREENHOUSE CG
+          INNER JOIN GDP ON CG.COUNTRY = GDP.COUNTRY AND CG.YEAR = GDP.YEAR
+        GROUP BY
+          CG.COUNTRY, CG.YEAR
+      ),
+      
+      CO2_SCORES AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          CO2_EMISSION / GDP_VALUE AS NORMALIZED_AGGREGATE_RATE,
+          CASE
+            WHEN CO2_EMISSION < 1000 THEN 5
+            WHEN CO2_EMISSION < 5000 THEN 4
+            WHEN CO2_EMISSION < 10000 THEN 3
+            WHEN CO2_EMISSION < 20000 THEN 2
+            ELSE 1
+          END AS CO2_SCORE
+        FROM
+          CO2_GDP
+      )
+      
+      SELECT
+        distinct(${val})
+      FROM
+        CO2_SCORES
+      `);
+  
+      await connection.close();
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
+  app.get('/q4/main', async (req, res) => {
+    try {
+      // Extract query parameters from the request URL
+      let {  selectedCountry, selectedStartYear, selectedEndYear } = req.query;
+      if (isNaN(selectedStartYear) || isNaN(selectedEndYear)) {
+        res.status(400).json({ error: 'Invalid year format' });
+        return;
+      }
+      
+  
+      // Modify your SQL query using the extracted parameters
+      const query = `WITH CO2_GDP AS (
+        SELECT
+          CG.COUNTRY,
+          CG.YEAR,
+          SUM(CG.VALUE) AS CO2_EMISSION,
+          SUM(GDP.VALUE) AS GDP_VALUE
+        FROM
+          CO2_GREENHOUSE CG
+          INNER JOIN GDP ON CG.COUNTRY = GDP.COUNTRY AND CG.YEAR = GDP.YEAR
+        WHERE
+          CG.YEAR between '${selectedStartYear}' and '${selectedEndYear}'
+          and cg.Country = '${selectedCountry}'
+        GROUP BY
+          CG.COUNTRY, CG.YEAR
+      ),
+      
+      CO2_SCORES AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          CO2_EMISSION / GDP_VALUE AS NORMALIZED_AGGREGATE_RATE,
+          CASE
+            WHEN CO2_EMISSION < 1000 THEN 5
+            WHEN CO2_EMISSION < 5000 THEN 4
+            WHEN CO2_EMISSION < 10000 THEN 3
+            WHEN CO2_EMISSION < 20000 THEN 2
+            ELSE 1
+          END AS CO2_SCORE
+        FROM
+          CO2_GDP
+      )
+      
+      SELECT
+        YEAR,
+        NORMALIZED_AGGREGATE_RATE * CO2_SCORE AS FINAL_AGGREGATE_VALUE
+      FROM
+        CO2_SCORES
+        ORDER BY YEAR
+      `;
+
+  
+      // Your code to fetch data from Oracle DB using the modified query
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(query);
+      await connection.close();
+  
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Q5
+
+  app.get('/q5', async (req, res) => {
+    try {
+      const connection = await oracledb.getConnection(dbConfig);
+      let result = await connection.execute(`WITH LandTemp AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          AVG(VALUE) AS AVG_LAND_TEMP
+        FROM
+          LANDTEMPDATA2
+        GROUP BY
+          COUNTRY, YEAR
+      ),
+      CO2Emissions AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          SUM(VALUE) AS TOTAL_CO2_EMISSIONS
+        FROM
+          CO2_GREENHOUSE
+      --  WHERE
+      --    POLUTANT = 'CO2'  -- Adjust the pollutant as needed
+        GROUP BY
+          COUNTRY, YEAR
+      ),
+      TemperatureScore AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          AVG_LAND_TEMP,
+          CASE
+            WHEN AVG_LAND_TEMP < 0 THEN 'Freezing'  -- Score for below freezing temperatures
+            WHEN AVG_LAND_TEMP >= 0 AND AVG_LAND_TEMP < 10 THEN 'Cold'  -- Score for cold temperatures
+            WHEN AVG_LAND_TEMP >= 10 AND AVG_LAND_TEMP < 20 THEN 'Mild'  -- Score for mild temperatures
+            WHEN AVG_LAND_TEMP >= 20 AND AVG_LAND_TEMP < 30 THEN 'Warm'  -- Score for warm temperatures
+            ELSE 'Hot'  -- Score for hot temperatures
+          END AS TEMP_Range
+        FROM
+          LandTemp
+      ), FinalData AS (
+      SELECT
+        TS.COUNTRY,
+        TS.YEAR,
+        TS.AVG_LAND_TEMP,
+        CE.TOTAL_CO2_EMISSIONS,
+        TS.TEMP_Range,
+        CASE
+            WHEN TOTAL_CO2_EMISSIONS >= 1 AND TOTAL_CO2_EMISSIONS < 1000000 THEN 'Low'  -- Score for Low CO2 emissions
+            WHEN TOTAL_CO2_EMISSIONS >= 1000000 AND TOTAL_CO2_EMISSIONS < 3000000 THEN 'Average'  --Score for average CO2 emissions
+            WHEN TOTAL_CO2_EMISSIONS >= 3000000 AND TOTAL_CO2_EMISSIONS < 10000000 THEN 'High'  -- Score for high CO2 emissions
+            ELSE 'High'
+          END AS CO2_RANGE
+        -- Complicated scoring logic for Y axis
+        --(TS.TEMP_SCORE * CE.TOTAL_CO2_EMISSIONS) / 100 AS COMPLICATED_Y_AXIS_CALCULATION
+      FROM
+        TemperatureScore TS
+      JOIN
+        CO2Emissions CE ON TS.COUNTRY = CE.COUNTRY AND TS.YEAR = CE.YEAR
+      ORDER BY
+        TS.COUNTRY, TS.YEAR
+      )
+      SELECT distinct(country)
+      FROM FINALDATA
+      
+      `);
+  
+      await connection.close();
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
+  app.get('/q5/main', async (req, res) => {
+    try {
+      // Extract query parameters from the request URL
+      let {  selectedCountry, selectedTempRange, selectedCo2Range } = req.query;
+      
+  
+      // Modify your SQL query using the extracted parameters
+      const query = `WITH LandTemp AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          AVG(VALUE) AS AVG_LAND_TEMP
+        FROM
+          LANDTEMPDATA2
+        GROUP BY
+          COUNTRY, YEAR
+      ),
+      CO2Emissions AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          SUM(VALUE) AS TOTAL_CO2_EMISSIONS
+        FROM
+          CO2_GREENHOUSE
+      --  WHERE
+      --    POLUTANT = 'CO2'  -- Adjust the pollutant as needed
+        GROUP BY
+          COUNTRY, YEAR
+      ),
+      TemperatureScore AS (
+        SELECT
+          COUNTRY,
+          YEAR,
+          AVG_LAND_TEMP,
+          CASE
+            WHEN AVG_LAND_TEMP < 0 THEN 'Freezing'  -- Score for below freezing temperatures
+            WHEN AVG_LAND_TEMP >= 0 AND AVG_LAND_TEMP < 10 THEN 'Cold'  -- Score for cold temperatures
+            WHEN AVG_LAND_TEMP >= 10 AND AVG_LAND_TEMP < 20 THEN 'Mild'  -- Score for mild temperatures
+            WHEN AVG_LAND_TEMP >= 20 AND AVG_LAND_TEMP < 30 THEN 'Warm'  -- Score for warm temperatures
+            ELSE 'Hot'  -- Score for hot temperatures
+          END AS TEMP_Range
+        FROM
+          LandTemp
+      ), FinalData AS (
+      SELECT
+        TS.COUNTRY,
+        TS.YEAR,
+        TS.AVG_LAND_TEMP,
+        CE.TOTAL_CO2_EMISSIONS,
+        TS.TEMP_Range,
+        CASE
+            WHEN TOTAL_CO2_EMISSIONS >= 1 AND TOTAL_CO2_EMISSIONS < 1000000 THEN 'Low'  -- Score for Low CO2 emissions
+            WHEN TOTAL_CO2_EMISSIONS >= 1000000 AND TOTAL_CO2_EMISSIONS < 3000000 THEN 'Average'  --Score for average CO2 emissions
+            WHEN TOTAL_CO2_EMISSIONS >= 3000000 AND TOTAL_CO2_EMISSIONS < 10000000 THEN 'High'  -- Score for high CO2 emissions
+            ELSE 'High'
+          END AS CO2_RANGE
+        -- Complicated scoring logic for Y axis
+        --(TS.TEMP_SCORE * CE.TOTAL_CO2_EMISSIONS) / 100 AS COMPLICATED_Y_AXIS_CALCULATION
+      FROM
+        TemperatureScore TS
+      JOIN
+        CO2Emissions CE ON TS.COUNTRY = CE.COUNTRY AND TS.YEAR = CE.YEAR
+      ORDER BY
+        TS.COUNTRY, TS.YEAR
+      )
+      SELECT Year, TOTAL_CO2_EMISSIONS
+      FROM FINALDATA
+      WHERE TEMP_RANGE='${selectedTempRange}' -- Input drop down - Freezing, Cold, Mild, Warm, Hot
+      and CO2_RANGE='${selectedCo2Range}'   -- Input drop down - Low, Average, High
+      and country='${selectedCountry}'   
+      `;
+
+  
+      // Your code to fetch data from Oracle DB using the modified query
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(query);
+      await connection.close();
+  
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

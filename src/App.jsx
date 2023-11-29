@@ -10,7 +10,7 @@ import Q2 from './Q2';
 import Q3 from './Q3';
 import Q4 from './Q4';
 import Q5 from './Q5';
-import Q6 from './Q6';
+import { UserProvider } from './UserContext';
 
 
 function App() {
@@ -23,71 +23,64 @@ function App() {
   
   return (
     <Router>
-      <Switch>
-        <Route path="/login" component={() => (
-          <>
-          <div className="login-main-container">
-            <Header OpenSidebar={OpenSidebar} />
-            <Login />
-            </div>
-          </>
-        )} />
-          
-        <Route path="/q2" component={() => (
+      <UserProvider>
+        <Switch>
+          <Route path="/login" component={() => (
             <>
-            <div className='grid-container'>
+            <div className="login-main-container">
               <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Q2 />
-            </div>
+              <Login />
+              </div>
             </>
           )} />
-          <Route path="/q3" component={() => (
-            <>
-            <div className='grid-container'>
-              <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Q3 />
-            </div>
-            </>
-          )} />
-          <Route path="/q4" component={() => (
-            <>
-            <div className='grid-container'>
-              <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Q4 />
-            </div>
-            </>
-          )} />
-          <Route path="/q5" component={() => (
-            <>
-            <div className='grid-container'>
-              <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Q5/>
-            </div>
-            </>
-          )} />
-          <Route path="/q6" component={() => (
-            <>
-            <div className='grid-container'>
-              <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Q6 />
-            </div>
-            </>
-          )} />
-          <Route path="/"  render={() => (
-            <>
-            <div className='grid-container'>
-              <Header OpenSidebar={OpenSidebar} />
-              <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
-              <Home />
-            </div>
-            </>
-          )} />
-      </Switch>
+            
+          <Route path="/q2" component={() => (
+              <>
+              <div className='grid-container'>
+                <Header OpenSidebar={OpenSidebar} />
+                <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+                <Q2 />
+              </div>
+              </>
+            )} />
+            <Route path="/q3" component={() => (
+              <>
+              <div className='grid-container'>
+                <Header OpenSidebar={OpenSidebar} />
+                <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+                <Q3 />
+              </div>
+              </>
+            )} />
+            <Route path="/q4" component={() => (
+              <>
+              <div className='grid-container'>
+                <Header OpenSidebar={OpenSidebar} />
+                <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+                <Q4 />
+              </div>
+              </>
+            )} />
+            <Route path="/q5" component={() => (
+              <>
+              <div className='grid-container'>
+                <Header OpenSidebar={OpenSidebar} />
+                <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+                <Q5/>
+              </div>
+              </>
+            )} />
+            <Route path="/"  render={() => (
+              <>
+              <div className='grid-container'>
+                <Header OpenSidebar={OpenSidebar} />
+                <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+                <Home />
+              </div>
+              </>
+            )} />
+        </Switch>
+      </UserProvider>
     </Router>
   );
 }

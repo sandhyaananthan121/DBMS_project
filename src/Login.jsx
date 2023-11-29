@@ -29,7 +29,7 @@ function Login() {
 
   if (loggedIn) {
     // Redirect the user to the '/' route upon successful login
-    return <Redirect to="/" />;
+    return <Redirect to={`/?username=${username}`} />;;
   }
   return (
     <div className="login-container">

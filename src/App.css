@@ -6,14 +6,24 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
+.mid {
+
+  display: flex;
+  justify-content: space-between;
+  margin-left: 15%;
+  margin-top: 8%;
+}
+
 button {
   background-color: #007bff;
   color: #fff;
-  padding: 10px;
+  padding: 15px;
+  text-size-adjust: 5px;
   border: none;
   border-radius: 3px;
   cursor: pointer;
-  margin-bottom: 50px;
+  margin-bottom: 30px;
+  margin-top: 30px;
 }
 .icon {
   vertical-align: middle;
@@ -102,9 +112,10 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px 0px 30px;
-  margin-bottom: 30px;
+  padding: 15px 30px 30px 30px;
+  background-color: #ccc;
 }
+
 
 .sidebar-title > span {
   display: none;
@@ -114,6 +125,7 @@ button {
   margin-top: 15px;
   font-size: 20px;
   font-weight: 700;
+  color: #0056b3;
 }
 
 .sidebar-list {
@@ -161,7 +173,7 @@ button {
 .main-title {
   display: flex;
   justify-content: space-between;
-  margin-left: 30%;
+  margin-left: 10%;
 }
 
 .main-cards {
@@ -217,13 +229,18 @@ button {
 /*Form styling */
 /* Home.css */
 .form-container {
-  margin-left: 20px;
-  padding: 20px;
+  margin-left: 10px;
+  padding: 10px;
   border-radius: 5px;
   display:block;
 }
 
 .form-label {
+  color: #9e9ea4;
+  margin-right: 10px;
+}
+
+.form-container p{
   color: #9e9ea4;
   margin-right: 10px;
 }
