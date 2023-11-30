@@ -82,7 +82,7 @@ app.get('/q1', async (req, res) => {
     }
   });
 
-  
+  // Main Bar graph
 
   app.get('/q1/main', async (req, res) => {
     try {
@@ -104,6 +104,7 @@ app.get('/q1', async (req, res) => {
             CO2_SECTORWISE.YEAR,
             CO2_SECTORWISE.SECTOR
     ),
+    -- Calculating Total Emissions for Each Country and Year
     TotalEmissions AS (
         SELECT
             COUNTRY,
@@ -115,13 +116,16 @@ app.get('/q1', async (req, res) => {
             COUNTRY,
             YEAR
     )
-    ,FinalCte AS (
+    ,
+    -- Calculating Final Contribution Percentage for Each Sector
+    FinalCte AS (
         SELECT
         SE.COUNTRY,
         SE.YEAR,
         SE.SECTOR,
         SE.SECTOR_CO2_EMISSION,
         TE.TOTAL_EMISSIONS,
+            -- Calculating sector contribution percentage to total emissions
         (SE.SECTOR_CO2_EMISSION / TE.TOTAL_EMISSIONS) * 100 AS SECTOR_CONTRIBUTION_PERCENTAGE
         --SE.SECTOR_CO2_EMISSION - LAG(SE.SECTOR_CO2_EMISSION) OVER (PARTITION BY SE.COUNTRY, SE.SECTOR ORDER BY SE.YEAR) AS PREVIOUS_YEAR_SECTOR_EMISSION
     FROM
@@ -132,6 +136,8 @@ app.get('/q1', async (req, res) => {
         SE.COUNTRY,
         SE.YEAR,
         SE.SECTOR)
+    --main q Year and Sector Contribution Percentage
+    
     SELECT Year,
     SECTOR_CONTRIBUTION_PERCENTAGE as sp
     FROM FinalCte
@@ -150,6 +156,8 @@ app.get('/q1', async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   });
+
+  // Pie Chart
 
   app.get('/q1/side', async (req, res) => {
     try {
@@ -171,6 +179,7 @@ app.get('/q1', async (req, res) => {
             CO2_SECTORWISE.YEAR,
             CO2_SECTORWISE.SECTOR
     ),
+    -- Calculating Total Emissions for Each Country and Year
     TotalEmissions AS (
         SELECT
             COUNTRY,
@@ -182,13 +191,16 @@ app.get('/q1', async (req, res) => {
             COUNTRY,
             YEAR
     )
-    ,FinalCte AS (
+    ,
+    -- Calculating Final Contribution Percentage for Each Sector
+    FinalCte AS (
         SELECT
         SE.COUNTRY,
         SE.YEAR,
         SE.SECTOR,
         SE.SECTOR_CO2_EMISSION,
         TE.TOTAL_EMISSIONS,
+            -- Calculating sector contribution percentage to total emissions
         (SE.SECTOR_CO2_EMISSION / TE.TOTAL_EMISSIONS) * 100 AS SECTOR_CONTRIBUTION_PERCENTAGE
         --SE.SECTOR_CO2_EMISSION - LAG(SE.SECTOR_CO2_EMISSION) OVER (PARTITION BY SE.COUNTRY, SE.SECTOR ORDER BY SE.YEAR) AS PREVIOUS_YEAR_SECTOR_EMISSION
     FROM
@@ -199,6 +211,8 @@ app.get('/q1', async (req, res) => {
         SE.COUNTRY,
         SE.YEAR,
         SE.SECTOR)
+    --main q Year and Sector Contribution Percentage
+    
     SELECT Sector,
     SECTOR_CONTRIBUTION_PERCENTAGE as sp
     FROM FinalCte
@@ -231,12 +245,15 @@ app.get('/q1', async (req, res) => {
             P1.COUNTRY,
             P1.YEAR,
             P1.VALUE AS POPULATION,
-            ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH
+		-- Calculate percentage growth in population
+            ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH,
+            (P1.VALUE - P0.VALUE)  AS POPULATION_GROWTH1  -- Calculate absolute growth in population
         FROM
             POPULATION P1
         JOIN
             POPULATION P0 ON P1.COUNTRY = P0.COUNTRY AND P1.YEAR = P0.YEAR + 1
     ),
+-- Calculate Total CO2 Emissions for Each Year
     CO2Emission AS (
         SELECT
             C.COUNTRY,
@@ -251,6 +268,7 @@ app.get('/q1', async (req, res) => {
         PG.COUNTRY,
         PG.YEAR,
         PG.POPULATION_GROWTH,
+        PG.POPULATION_GROWTH1,
         CE.CO2_EMISSION
     FROM
         PopulationGrowth PG
@@ -258,18 +276,30 @@ app.get('/q1', async (req, res) => {
         CO2Emission CE ON PG.COUNTRY = CE.COUNTRY AND PG.YEAR = CE.YEAR
     ORDER BY
         PG.COUNTRY, PG.YEAR)
-    , RateChange AS (
+    , 
+-- Calculate Rates of Change for Population Growth and CO2 Emission
+RateChange AS (
         SELECT 
         COUNTRY,
         YEAR,
         POPULATION_GROWTH,
+        POPULATION_GROWTH1,
         CO2_EMISSION,
+-- Calculate lagged values for comparison
         LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag,
+-- Calculate change in population growth
         POPULATION_GROWTH - LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange,
+-- Calculate lagged values for absolute growth
+        LAG(POPULATION_GROWTH1) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag1,
+-- Calculate change in absolute population growth
+        POPULATION_GROWTH1 - LAG(POPULATION_GROWTH1) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange1,
+-- Calculate lagged values for CO2 emissions
         LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Lag,
-        CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
+-- Calculate change in CO2 emissions        
+CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
         FROM POpulationCO2
     )
+
     SELECT 
     distinct(${val})
     FROM RateChange
@@ -303,13 +333,15 @@ app.get('/q1', async (req, res) => {
             P1.COUNTRY,
             P1.YEAR,
             P1.VALUE AS POPULATION,
+		-- Calculate percentage growth in population
             ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH,
-            (P1.VALUE - P0.VALUE)  AS POPULATION_GROWTH1
+            (P1.VALUE - P0.VALUE)  AS POPULATION_GROWTH1  -- Calculate absolute growth in population
         FROM
             POPULATION P1
         JOIN
             POPULATION P0 ON P1.COUNTRY = P0.COUNTRY AND P1.YEAR = P0.YEAR + 1
     ),
+-- Calculate Total CO2 Emissions for Each Year
     CO2Emission AS (
         SELECT
             C.COUNTRY,
@@ -332,31 +364,40 @@ app.get('/q1', async (req, res) => {
         CO2Emission CE ON PG.COUNTRY = CE.COUNTRY AND PG.YEAR = CE.YEAR
     ORDER BY
         PG.COUNTRY, PG.YEAR)
-    , RateChange AS (
+    , 
+-- Calculate Rates of Change for Population Growth and CO2 Emission
+RateChange AS (
         SELECT 
         COUNTRY,
         YEAR,
         POPULATION_GROWTH,
         POPULATION_GROWTH1,
         CO2_EMISSION,
+-- Calculate lagged values for comparison
         LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag,
+-- Calculate change in population growth
         POPULATION_GROWTH - LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange,
+-- Calculate lagged values for absolute growth
         LAG(POPULATION_GROWTH1) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag1,
+-- Calculate change in absolute population growth
         POPULATION_GROWTH1 - LAG(POPULATION_GROWTH1) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange1,
+-- Calculate lagged values for CO2 emissions
         LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Lag,
-        CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
+-- Calculate change in CO2 emissions        
+CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
         FROM POpulationCO2
     )
     SELECT Year,
     CO2_EMISSION,
     Population_Growth1 as Population_growth
     FROM RateChange
-    where  country='${selectedCountry}'
-    AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}'
-    and PopulationChange<0
-    and CO2Change<0
-    and PopulationChange is NOT NULL
-    AND CO2Change IS NOT NULL
+    where  country='${selectedCountry}' -- Parameter for selected country
+    AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}' -- Parameters for selected year range
+    and PopulationChange<0 -- Filter for negative population change
+    and CO2Change<0 -- Filter for negative CO2 emission change
+    and PopulationChange is NOT NULL -- Ensure non-null population change values
+    AND CO2Change IS NOT NULL -- Ensure non-null CO2 emission change values
+
 
       `;
 
@@ -387,12 +428,14 @@ app.get('/q3', async (req, res) => {
             CG.YEAR,
             CG.VALUE AS CO2_EMISSION,
             ET.EMISSIONS_TAXED,
-            (
+     -- Subquery to get the maximum CO2 emissions from the previous year       
+(
                 SELECT MAX(PREVIOUS_CO2.VALUE)
                 FROM CO2_GREENHOUSE PREVIOUS_CO2
                 WHERE PREVIOUS_CO2.COUNTRY = CG.COUNTRY
                 AND PREVIOUS_CO2.YEAR = CG.YEAR - 1
             ) AS PREVIOUS_CO2_EMISSION,
+-- Subquery to get the maximum emissions taxed from the previous year
             (
                 SELECT MAX(PREVIOUS_TAX.EMISSIONS_TAXED)
                 FROM ENVIRONMENTAL_TAX PREVIOUS_TAX
@@ -404,17 +447,22 @@ app.get('/q3', async (req, res) => {
         JOIN
             ENVIRONMENTAL_TAX ET ON CG.COUNTRY = ET.COUNTRY AND CG.YEAR = ET.YEAR
     )
-    , TotalEmissionTax AS (
+    , 
+
+-- Calculate Total CO2 Emissions and Total Tax for Each Year
+TotalEmissionTax AS (
         SELECT distinct
         COUNTRY,
         YEAR,
-        SUM(CO2_EMISSION) AS TotalCO2_EMISSION,
-        SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED
+        SUM(CO2_EMISSION) AS TotalCO2_EMISSION, -- Sum of CO2 emissions for the year
+        SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED -- Sum of emissions taxed for the year
     FROM
         CO2TaxData
     GROUP BY
         COUNTRY, YEAR
-    ), RateChange AS (
+    ), 
+-- Calculate Rate of Change for CO2 Emissions and Tax
+RateChange AS (
         SELECT distinct 
         c.COUNTRY,
         c.YEAR,
@@ -422,7 +470,9 @@ app.get('/q3', async (req, res) => {
         PREVIOUS_CO2_EMISSION,
         TotalEMISSIONS_TAXED,
         PREVIOUS_EMISSIONS_TAXED,
+-- Calculate change in CO2 emissions
         TotalCO2_EMISSION - PREVIOUS_CO2_EMISSION AS CO2_EMISSION_CHANGE,
+-- Calculate change in emissions taxed
         TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE
     FROM
         CO2TaxData c
@@ -430,17 +480,21 @@ app.get('/q3', async (req, res) => {
         on c.country=t.country and c.year=t.year
     ORDER BY
         COUNTRY, YEAR
-    ), CorrValue AS (
-        SELECT YEAR,COUNTRY
-        ,CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
+    ), 
+-- Calculate Correlation Between CO2 Emission and Tax Change
+CorrValue AS (
+        SELECT YEAR,COUNTRY,
+    -- Calculate correlation between CO2 emission change and tax change
+CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
         FROM RateChange
         WHERE
         CO2_EMISSION_CHANGE is not null
         and tax_change is not null
     )
+-- Select Distinct Values from Correlation Data
     SELECT
     distinct(${val})
-    FROM CorrValue
+
     `);
   
       await connection.close();
@@ -468,13 +522,15 @@ app.get('/q3', async (req, res) => {
             CG.YEAR,
             CG.VALUE AS CO2_EMISSION,
             ET.EMISSIONS_TAXED,
-            (
+   -- Subquery to get the maximum CO2 emissions from the previous year   
+(
                 SELECT MAX(PREVIOUS_CO2.VALUE)
                 FROM CO2_GREENHOUSE PREVIOUS_CO2
                 WHERE PREVIOUS_CO2.COUNTRY = CG.COUNTRY
                 AND PREVIOUS_CO2.YEAR = CG.YEAR - 1
             ) AS PREVIOUS_CO2_EMISSION,
-            (
+           -- Subquery to get the maximum emissions taxed from the previous year         
+(
                 SELECT MAX(PREVIOUS_TAX.EMISSIONS_TAXED)
                 FROM ENVIRONMENTAL_TAX PREVIOUS_TAX
                 WHERE PREVIOUS_TAX.COUNTRY = ET.COUNTRY
@@ -485,17 +541,23 @@ app.get('/q3', async (req, res) => {
         JOIN
             ENVIRONMENTAL_TAX ET ON CG.COUNTRY = ET.COUNTRY AND CG.YEAR = ET.YEAR
     )
-    , TotalEmissionTax AS (
+    , 
+-- Calculate Total CO2 Emissions and Total Tax for Each Year
+TotalEmissionTax AS (
         SELECT distinct
         COUNTRY,
         YEAR,
+        -- Sum of CO2 emissions for the year
         SUM(CO2_EMISSION) AS TotalCO2_EMISSION,
+-- Sum of emissions taxed for the year
         SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED
     FROM
         CO2TaxData
     GROUP BY
         COUNTRY, YEAR
-    ), RateChange AS (
+    ), 
+-- Calculate Rate of Change for CO2 Emissions and Tax
+RateChange AS (
         SELECT distinct 
         c.COUNTRY,
         c.YEAR,
@@ -503,28 +565,35 @@ app.get('/q3', async (req, res) => {
         PREVIOUS_CO2_EMISSION,
         TotalEMISSIONS_TAXED,
         PREVIOUS_EMISSIONS_TAXED,
+-- Calculate change in CO2 emissions
         TotalCO2_EMISSION - PREVIOUS_CO2_EMISSION AS CO2_EMISSION_CHANGE,
-        TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE
+-- Calculate change in emissions taxed
+        TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE 
     FROM
         CO2TaxData c
         JOIN TotalEmissionTax t
         on c.country=t.country and c.year=t.year
     ORDER BY
         COUNTRY, YEAR
-    ), CorrValue AS (
+    ), 
+-- Calculate Correlation Between CO2 Emission and Tax Change
+CorrValue AS (
         SELECT YEAR,COUNTRY
+        -- Calculate correlation between CO2 emission change and tax change
         ,CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
         FROM RateChange
         WHERE
         CO2_EMISSION_CHANGE is not null
         and tax_change is not null
     )
+-- Select Final Output
     SELECT YEAR,
     CO2_TAX_CORRELATION
     FROM CorrValue
-    WHERE COUNTRY= '${selectedCountry}'
-        AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}'
-        AND CO2_TAX_CORRELATION IS NOT NULL
+    WHERE COUNTRY= '${selectedCountry}' -- Parameter for selected country
+        AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}' - Parameters for selected year range
+        AND CO2_TAX_CORRELATION IS NOT NULL -- Ensure non-null correlation values
+
     `;
 
   
@@ -558,13 +627,15 @@ app.get('/q3', async (req, res) => {
         GROUP BY
           CG.COUNTRY, CG.YEAR
       ),
-      
+      -- Calculate Normalized Aggregate Rate and CO2 Score    
       CO2_SCORES AS (
         SELECT
           COUNTRY,
           YEAR,
+          -- Calculate the normalized aggregate rate (CO2 Emission / GDP)
           CO2_EMISSION / GDP_VALUE AS NORMALIZED_AGGREGATE_RATE,
           CASE
+          -- Assign CO2 scores based on CO2 emission thresholds
             WHEN CO2_EMISSION < 1000 THEN 5
             WHEN CO2_EMISSION < 5000 THEN 4
             WHEN CO2_EMISSION < 10000 THEN 3
@@ -604,23 +675,25 @@ app.get('/q3', async (req, res) => {
         SELECT
           CG.COUNTRY,
           CG.YEAR,
-          SUM(CG.VALUE) AS CO2_EMISSION,
-          SUM(GDP.VALUE) AS GDP_VALUE
+          SUM(CG.VALUE) AS CO2_EMISSION, -- Sum of CO2 emissions for the selected year range and country
+          SUM(GDP.VALUE) AS GDP_VALUE   -- Sum of GDP values for the selected year range and country
         FROM
           CO2_GREENHOUSE CG
           INNER JOIN GDP ON CG.COUNTRY = GDP.COUNTRY AND CG.YEAR = GDP.YEAR
         WHERE
-          CG.YEAR between '${selectedStartYear}' and '${selectedEndYear}'
-          and cg.Country = '${selectedCountry}'
+          CG.YEAR between '${selectedStartYear}' and '${selectedEndYear}' -- Filter by selected year range
+          and cg.Country = '${selectedCountry}' -- Filter by selected country
         GROUP BY
           CG.COUNTRY, CG.YEAR
       ),
-      
+ -- Calculate Normalized Aggregate Rate and CO2 Score    
       CO2_SCORES AS (
         SELECT
           COUNTRY,
           YEAR,
+        -- Calculate the normalized aggregate rate (CO2 Emission / GDP)
           CO2_EMISSION / GDP_VALUE AS NORMALIZED_AGGREGATE_RATE,
+        -- Assign CO2 scores based on CO2 emission thresholds
           CASE
             WHEN CO2_EMISSION < 1000 THEN 5
             WHEN CO2_EMISSION < 5000 THEN 4
@@ -634,10 +707,12 @@ app.get('/q3', async (req, res) => {
       
       SELECT
         YEAR,
+    -- Calculate the final aggregate value (Normalized Aggregate Rate * CO2 Score)
         NORMALIZED_AGGREGATE_RATE * CO2_SCORE AS FINAL_AGGREGATE_VALUE
       FROM
         CO2_SCORES
         ORDER BY YEAR
+
       `;
 
   

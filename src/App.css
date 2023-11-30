@@ -378,6 +378,27 @@ button {
 }
 
 /* Medium <= 992px */
+
+/* Trends */
+
+.trend-indicators {
+  display: flex;
+  height: 10vh;
+  margin-left: 70px;
+  margin-top: 50px;
+
+}
+
+.trend-indicator{
+  background-color: #1d2634; /* Background color for the login box */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Box shadow for the login box */
+  padding: 30px;
+  text-align: center;
+  border-radius: 5px;
+  width: 30%; /* Adjust the width as needed */
+  max-width: 300px; /* Limit the maximum width for larger screens */
+  
+}
   
 @media screen and (max-width: 992px) {
   .grid-container {

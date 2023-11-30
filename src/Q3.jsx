@@ -119,6 +119,20 @@ function Q3() {
     fetchCountries();
   }, []);
 
+  // trend
+  const getTrendDirection = (data, key) => {
+    const trendValues = data.map((item, index) => {
+      if (index !== 0) {
+        return item[key] > data[index - 1][key] ? 'up' : 'down';
+      }
+      return null;
+    });
+  
+    // Return the last value (latest trend)
+    return trendValues[trendValues.length - 1];
+  };
+
+
   return (
     <main className='main-container'>
       <div className='main-title'>
@@ -238,6 +252,8 @@ function Q3() {
           </button>
         </form>
         </div>
+
+
     </main>
   )
 } 

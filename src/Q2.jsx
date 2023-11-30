@@ -92,6 +92,22 @@ function Q2() {
     fetchCountries();
   }, []);
 
+
+  // Trends
+
+  const getTrendDirection = (data, key) => {
+    const trendValues = data.map((item, index) => {
+      if (index !== 0) {
+        return item[key] > data[index - 1][key] ? 'up' : 'down';
+      }
+      return null;
+    });
+  
+    // Return the last value (latest trend)
+    return trendValues[trendValues.length - 1];
+  };
+
+
   return (
     <main className='main-container'>
       <div className='main-title'>
@@ -176,6 +192,24 @@ function Q2() {
             Apply
           </button>
         </form>
+        </div>
+        <div className='trend-indicators'>
+          <div className='trend-indicator'>
+            Co2 Emission Trend: <span></span><span></span> 
+            {getTrendDirection(chartData, 'Co2_Emission') === 'up' ? (
+              <span>&#8593;</span> // Upward arrow
+            ) : (
+              <span>&#8595;</span> // Downward arrow
+            )}
+          </div>
+          <div className='trend-indicator'>
+            Population Growth Trend: <span></span><span></span>
+            {getTrendDirection(chartData, 'Population_Growth') === 'up' ? (
+              <span>&#8593;</span> // Upward arrow
+            ) : (
+              <span>&#8595;</span> // Downward arrow
+            )}
+          </div>
         </div>
     </main>
   )
