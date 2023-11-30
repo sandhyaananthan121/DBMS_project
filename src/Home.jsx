@@ -13,7 +13,9 @@ function Home() {
   const [sectors, setSectors] = useState([]);
 
   // pie chart variable
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042','#ff7300', '#413ea0'];
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#ff7300', '#413ea0'];
+
+
   const RADIAN = Math.PI / 180;
 
   
