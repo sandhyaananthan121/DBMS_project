@@ -121,6 +121,12 @@ button {
   display: none;
 }
 
+.max h4{
+  display: flex;
+  margin-left: 20%;
+
+}
+
 .sidebar-brand {
   margin-top: 15px;
   font-size: 18px;

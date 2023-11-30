@@ -190,6 +190,9 @@ function Q4() {
           </button>
         </form>
         </div>
+        <div className='max'>
+        <h4>Max Value : {maxValue}</h4>
+        </div>
     </main>
   )
 } 
