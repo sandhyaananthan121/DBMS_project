@@ -138,7 +138,9 @@ function Q3() {
       <div className='main-title'>
         <h3>CO2 Emission levels affected by Environmental Tax Correlation on {selectedCountry1} and {selectedCountry2}</h3>
       </div>
-
+    <div className='a1'>
+        <p>Unit in Tonnes of Co2</p>
+      </div>  
       <div className='charts'>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart

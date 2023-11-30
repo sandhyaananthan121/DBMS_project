@@ -113,7 +113,9 @@ function Q2() {
       <div className='main-title'>
         <h3>CO2 Emission and Population Growth correlation on {selectedCountry} from {selectedStartYear} to {selectedEndYear}</h3>
       </div>
-
+      <div className='a1'>
+        <p>Unit in Tonnes of Co2</p>
+      </div>
       <div className='charts'>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart

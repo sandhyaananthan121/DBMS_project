@@ -86,6 +86,9 @@ function Q5() {
       <div className='main-title'>
         <h3>Total Co2 Emissions affected by {selectedTempRange} Temperature grouped by type of emission on {selectedCountry} </h3>
       </div>
+      <div className='a1'>
+        <p>Unit in Tonnes of Co2 Equivalent</p>
+      </div>
 
       <div className='charts'>
       <ResponsiveContainer width="100%" height="100%">

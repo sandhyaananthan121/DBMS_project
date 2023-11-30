@@ -120,7 +120,9 @@ function Home() {
       <div className='main-title'>
         <h3>CO2 Contribution % by {selectedCountry} in {sector} Sector</h3>
       </div>
-
+      <div className='a1'>
+        <p>Unit in % Co2 emission</p>
+      </div>
       <div className='charts'>
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart

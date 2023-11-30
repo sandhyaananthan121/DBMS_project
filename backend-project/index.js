@@ -82,6 +82,8 @@ app.get('/q1', async (req, res) => {
     }
   });
 
+
+  // Q1 - Sector wise co2 emission % analysis compared to previous year growth 
   // Main Bar graph
 
   app.get('/q1/main', async (req, res) => {
@@ -494,6 +496,7 @@ CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) 
 -- Select Distinct Values from Correlation Data
     SELECT
     distinct(${val})
+    From CorrValue
 
     `);
   
@@ -516,21 +519,22 @@ CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) 
       
   
       // Modify your SQL query using the extracted parameters
-      const query = `WITH CO2TaxData AS (
+      const query = `
+      WITH CO2TaxData AS (
         SELECT distinct 
             CG.COUNTRY,
             CG.YEAR,
             CG.VALUE AS CO2_EMISSION,
             ET.EMISSIONS_TAXED,
-   -- Subquery to get the maximum CO2 emissions from the previous year   
+     -- Subquery to get the maximum CO2 emissions from the previous year       
 (
                 SELECT MAX(PREVIOUS_CO2.VALUE)
                 FROM CO2_GREENHOUSE PREVIOUS_CO2
                 WHERE PREVIOUS_CO2.COUNTRY = CG.COUNTRY
                 AND PREVIOUS_CO2.YEAR = CG.YEAR - 1
             ) AS PREVIOUS_CO2_EMISSION,
-           -- Subquery to get the maximum emissions taxed from the previous year         
-(
+-- Subquery to get the maximum emissions taxed from the previous year
+            (
                 SELECT MAX(PREVIOUS_TAX.EMISSIONS_TAXED)
                 FROM ENVIRONMENTAL_TAX PREVIOUS_TAX
                 WHERE PREVIOUS_TAX.COUNTRY = ET.COUNTRY
@@ -542,15 +546,14 @@ CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) 
             ENVIRONMENTAL_TAX ET ON CG.COUNTRY = ET.COUNTRY AND CG.YEAR = ET.YEAR
     )
     , 
+
 -- Calculate Total CO2 Emissions and Total Tax for Each Year
 TotalEmissionTax AS (
         SELECT distinct
         COUNTRY,
         YEAR,
-        -- Sum of CO2 emissions for the year
-        SUM(CO2_EMISSION) AS TotalCO2_EMISSION,
--- Sum of emissions taxed for the year
-        SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED
+        SUM(CO2_EMISSION) AS TotalCO2_EMISSION, -- Sum of CO2 emissions for the year
+        SUM(EMISSIONS_TAXED) as TotalEMISSIONS_TAXED -- Sum of emissions taxed for the year
     FROM
         CO2TaxData
     GROUP BY
@@ -568,7 +571,7 @@ RateChange AS (
 -- Calculate change in CO2 emissions
         TotalCO2_EMISSION - PREVIOUS_CO2_EMISSION AS CO2_EMISSION_CHANGE,
 -- Calculate change in emissions taxed
-        TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE 
+        TotalEMISSIONS_TAXED - PREVIOUS_EMISSIONS_TAXED AS TAX_CHANGE
     FROM
         CO2TaxData c
         JOIN TotalEmissionTax t
@@ -578,22 +581,21 @@ RateChange AS (
     ), 
 -- Calculate Correlation Between CO2 Emission and Tax Change
 CorrValue AS (
-        SELECT YEAR,COUNTRY
-        -- Calculate correlation between CO2 emission change and tax change
-        ,CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
+        SELECT YEAR,COUNTRY,
+    -- Calculate correlation between CO2 emission change and tax change
+CORR(CO2_EMISSION_CHANGE, TAX_CHANGE) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as CO2_TAX_CORRELATION
         FROM RateChange
         WHERE
         CO2_EMISSION_CHANGE is not null
         and tax_change is not null
     )
--- Select Final Output
+-- Select Distinct Values from Correlation Data
     SELECT YEAR,
     CO2_TAX_CORRELATION
     FROM CorrValue
-    WHERE COUNTRY= '${selectedCountry}' -- Parameter for selected country
-        AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}' - Parameters for selected year range
-        AND CO2_TAX_CORRELATION IS NOT NULL -- Ensure non-null correlation values
-
+    WHERE COUNTRY='${selectedCountry}'
+        AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}'
+        AND CO2_TAX_CORRELATION IS NOT NULL
     `;
 
   

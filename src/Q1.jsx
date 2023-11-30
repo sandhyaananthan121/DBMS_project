@@ -102,7 +102,7 @@ function Q1() {
       <div className='main-title'>
         <h3>CO2 Produced By by {selectedCountry} in {sector} Sector </h3>
       </div>
-
+      
         <div className='charts'>
           
             <ResponsiveContainer width="100%" height="100%">

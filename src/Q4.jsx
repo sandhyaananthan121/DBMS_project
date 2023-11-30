@@ -110,7 +110,9 @@ function Q4() {
       <div className='main-title'>
         <h3>Normalized Aggregate rate for CO2 emission taking into account GDP of {selectedCountry} during {selectedStartYear} to {selectedEndYear}</h3>
       </div>
-
+      <div className='a1'>
+        <p>Unit in Normalized Value of Tonnes of Co2, Range 0-5</p>
+      </div>
       <div className='charts'>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart

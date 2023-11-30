@@ -389,6 +389,9 @@ button {
 
 }
 
+.a1 {
+  margin-left: 30px;
+}
 .trend-indicator{
   background-color: #1d2634; /* Background color for the login box */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Box shadow for the login box */
