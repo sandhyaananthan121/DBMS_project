@@ -272,7 +272,12 @@ app.get('/q1', async (req, res) => {
     )
     SELECT 
     distinct(${val})
-    FROM RateChange`);
+    FROM RateChange
+    where PopulationChange<0
+    and CO2Change<0
+    and PopulationChange is NOT NULL
+    AND CO2Change IS NOT NULL
+    `);
   
       await connection.close();
       res.json(result.rows);
