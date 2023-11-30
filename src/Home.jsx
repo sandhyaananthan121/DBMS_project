@@ -205,7 +205,7 @@ function Home() {
             </text>
           );
         }}
-        outerRadius={80}
+        outerRadius={120}
         fill="#8884d8"
         dataKey="value"
       >

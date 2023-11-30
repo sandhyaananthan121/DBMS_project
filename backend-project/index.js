@@ -303,7 +303,8 @@ app.get('/q1', async (req, res) => {
             P1.COUNTRY,
             P1.YEAR,
             P1.VALUE AS POPULATION,
-            ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH
+            ((P1.VALUE - P0.VALUE) / P0.VALUE) * 100 AS POPULATION_GROWTH,
+            (P1.VALUE - P0.VALUE)  AS POPULATION_GROWTH1
         FROM
             POPULATION P1
         JOIN
@@ -323,6 +324,7 @@ app.get('/q1', async (req, res) => {
         PG.COUNTRY,
         PG.YEAR,
         PG.POPULATION_GROWTH,
+        PG.POPULATION_GROWTH1,
         CE.CO2_EMISSION
     FROM
         PopulationGrowth PG
@@ -335,16 +337,19 @@ app.get('/q1', async (req, res) => {
         COUNTRY,
         YEAR,
         POPULATION_GROWTH,
+        POPULATION_GROWTH1,
         CO2_EMISSION,
         LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag,
         POPULATION_GROWTH - LAG(POPULATION_GROWTH) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange,
+        LAG(POPULATION_GROWTH1) OVER (PARTITION BY COUNTRY ORDER BY YEAR) as PopulationLag1,
+        POPULATION_GROWTH1 - LAG(POPULATION_GROWTH1) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS PopulationChange1,
         LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Lag,
         CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO2Change
         FROM POpulationCO2
     )
     SELECT Year,
     CO2_EMISSION,
-    Population_Growth*1000000 as Population_growth
+    Population_Growth1 as Population_growth
     FROM RateChange
     where  country='${selectedCountry}'
     AND YEAR BETWEEN '${selectedStartYear}' AND '${selectedEndYear}'
