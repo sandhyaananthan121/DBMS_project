@@ -87,7 +87,8 @@ function Q3() {
       }
       const data = await response.json();
       // Assuming data is an array of country names
-      setYears(data);
+      const sortedYears = data.sort((a, b) => a - b);
+      setYears(sortedYears);
     } catch (error) {
       console.error('Error fetching years:', error);
     }
@@ -208,7 +209,7 @@ function Q3() {
             value={selectedStartYear}
             className='form-select'
           >
-            <option value=''>Select Start Year: </option>
+            <option value=''>Select Start Year </option>
             {years.map((year) => (
               <option key={year} value={year}>
                 {year}
@@ -224,7 +225,7 @@ function Q3() {
             value={selectedEndYear}
             className='form-select'
           >
-            <option value=''>Select End Year: </option>
+            <option value=''>Select End Year </option>
             {years.map((year) => (
               <option key={year} value={year}>
                 {year}
