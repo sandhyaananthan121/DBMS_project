@@ -84,7 +84,7 @@ function Q5() {
   return (
     <main className='main-container'>
       <div className='main-title'>
-        <h3>CO2 Contribution % by  Sector</h3>
+        <h3>Total Co2 Emissions affected by {selectedTempRange} Temperature grouped by type of emission on {selectedCountry} </h3>
       </div>
 
       <div className='charts'>

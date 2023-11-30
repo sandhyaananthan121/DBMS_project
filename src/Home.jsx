@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Sector, Cell, } from 'recharts';
 
 function Home() {
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  
   const [selectedCountry, setSelectedCountry] = useState('');
+  const [year, setSelectedYear] = useState('');
   const [sector, setSector] = useState('');
   const [chartData, setChartData] = useState([]);
   const [chartData1, setChartData1] = useState([]);
   const [countries, setCountries] = useState([]);
   const [sectors, setSectors] = useState([]);
 
-  const handleStartDateChange = (e) => {
-    setStartDate(e.target.value);
-  };
+  // pie chart variable
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042','#ff7300', '#413ea0'];
+  const RADIAN = Math.PI / 180;
 
-  const handleEndDateChange = (e) => {
-    setEndDate(e.target.value);
+  
+  const handleYear = (e) => {
+    setSelectedYear(e.target.value);
   };
-
 
   const handleCountryChange = (e) => {
     setSelectedCountry(e.target.value);
@@ -42,8 +42,6 @@ function Home() {
       console.error('Error fetching sector:', error);
     }
   };
-
-
   
   useEffect(() => {
     // Fetch countries when the component mounts
@@ -64,15 +62,20 @@ function Home() {
       console.log(chartData1);
   };
 
+  const transformDataForChart1 = (data) => {
+    return data.map((item) => ({
+      year: item[0], // Replace 'date' with your date key
+      Sector_Contribution_Percentage: item[1], // Replace 'value' with your value key
+    }));
+  };
+
   const handleApplyClick = (e) => {
     e.preventDefault();
     // Make an API call with selected data
-    fetch(`http://localhost:3001/q1?selectedCountry=${selectedCountry}&startDate=${startDate}&endDate=${endDate}&sector=${sector}`)
+    fetch(`http://localhost:3001/q1/side?selectedCountry=${selectedCountry}&selectedYear=${year}`)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
-        setChartData(transformDataForChart(sortedData));
+        setChartData(transformDataForChart(data));
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -82,17 +85,12 @@ function Home() {
 
   const transformDataForChart = (data) => {
     return data.map((item) => ({
-      date: item[1], // Replace 'date' with your date key
-      value: item[0], // Replace 'value' with your value key
+      sector: item[0], // Replace 'date' with your date key
+      value: item[1], // Replace 'value' with your value key
     }));
   };
 
-  const transformDataForChart1 = (data) => {
-    return data.map((item) => ({
-      year: item[0], // Replace 'date' with your date key
-      Sector_Contribution_Percentage: item[1], // Replace 'value' with your value key
-    }));
-  };
+  
 
 
   // Fetch countries
@@ -140,7 +138,7 @@ function Home() {
             
             <Tooltip />
             <Legend />
-            <Bar dataKey='Sector_Contribution_Percentage' fill='#8884d8' />
+            <Bar dataKey='Sector_Contribution_Percentage' fill='#6784d8' />
           </BarChart>
         </ResponsiveContainer>
 
@@ -183,79 +181,73 @@ function Home() {
         </form>
         </div>
         <div className='mid'>
-            <h4> Secondary Chart with Selectable Date for more range </h4>
+            <h4> Pie Chart of Co2 % contributed by all sectors in {selectedCountry} at {year} </h4>
         </div>
         <div className='charts'>
           
-            <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-            width={50}
-            height={30}
-            data={chartData}
-            margin={{
-                top: 5,
-                right: 20,
-                left: 20,
-                bottom: 35,
-            }}
-            >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" fill="#8884d8" />
-                </BarChart>
-            </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%">
+    <PieChart width={400} height={300}>
+      <Pie
+        data={chartData}
+        cx="50%"
+        cy="50%"
+        labelLine={false}
+        label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+          const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+          const x = cx + radius * Math.cos(-midAngle * RADIAN);
+          const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+          return (
+            <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+              {`${chartData[index].sector}: ${(percent * 100).toFixed(0)}%`}
+            </text>
+          );
+        }}
+        outerRadius={80}
+        fill="#8884d8"
+        dataKey="value"
+      >
+        {chartData.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+    </PieChart>
+  </ResponsiveContainer>
             
         <form className='form-container'>
-        <label htmlFor="countrySelector" className='form-label'>Country:</label>
+        <label htmlFor='countrySelector' className='form-label'>
+            Country:
+          </label>
           <select
-            id="countrySelector"
-            name="country"
+            id='countrySelector'
+            name='country'
             onChange={handleCountryChange}
             value={selectedCountry}
-            className="form-select"
+            className='form-select'
           >
-            <option value="">Select Country</option>
+            <option value=''>Select Country</option>
             {countries.map((country) => (
-              <option key = {country} value={country}>{country}</option>
+              <option key={country} value={country}>
+                {country}
+              </option>
             ))}
           </select>
             <br></br>
-            <p> (Dates available from 01-26-2019 to 01-26-2023)</p>
-          <label htmlFor="startDate" className='form-label'>Start Date:</label>
-          <input
-            type="date"
-            id="startDate"
-            name="startDate"
-            value={startDate}
-            onChange={handleStartDateChange}
-            className='form-date-input'
-          />
-            <br></br>
-          <label htmlFor="endDate" className='form-label'>End Date:</label>
-          <input
-            type="date"
-            id="endDate"
-            name="endDate"
-            value={endDate}
-            onChange={handleEndDateChange}
-            className='form-date-input'
-          />
-            <br></br>
-            <label htmlFor="sectorSelector" className='form-label'>Sector:</label>
+            <label htmlFor="sectorYear" className='form-label'>Year:</label>
             <select
-            id="sectorSelector"
-            name="sector"
-            onChange={handleSector}
-            value={sector}
+            id="sectorYear"
+            name="year"
+            onChange={handleYear}
+            value={year}
             className="form-select"
           >
-            <option value="">Select Sector</option>
-            {sectors.map((sector) => (
-              <option key = {sector} value={sector}>{sector}</option>
-            ))}
+            <option value="">Select Year</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            
             
             {/* Add more country options here */}
           </select>

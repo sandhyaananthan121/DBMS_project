@@ -151,6 +151,75 @@ app.get('/q1', async (req, res) => {
     }
   });
 
+  app.get('/q1/side', async (req, res) => {
+    try {
+      // Extract query parameters from the request URL
+      let {  selectedCountry, selectedYear } = req.query;
+  
+      // Modify your SQL query using the extracted parameters
+      const query = `WITH SectorEmissions AS (
+        SELECT
+            CO2_SECTORWISE.COUNTRY,
+            CO2_SECTORWISE.YEAR,
+            CO2_SECTORWISE.SECTOR,
+            SUM(CO2_SECTORWISE.VALUE) AS SECTOR_CO2_EMISSION
+            --SUM(SUM(CO2_SECTORWISE.VALUE)) OVER (PARTITION BY CO2_SECTORWISE.COUNTRY, CO2_SECTORWISE.YEAR) AS TOTAL_EMISSIONS_YEAR
+        FROM
+            CO2_SECTORWISE
+        GROUP BY
+            CO2_SECTORWISE.COUNTRY,
+            CO2_SECTORWISE.YEAR,
+            CO2_SECTORWISE.SECTOR
+    ),
+    TotalEmissions AS (
+        SELECT
+            COUNTRY,
+            YEAR,
+            SUM(SECTOR_CO2_EMISSION) AS TOTAL_EMISSIONS
+        FROM
+            SectorEmissions
+        GROUP BY
+            COUNTRY,
+            YEAR
+    )
+    ,FinalCte AS (
+        SELECT
+        SE.COUNTRY,
+        SE.YEAR,
+        SE.SECTOR,
+        SE.SECTOR_CO2_EMISSION,
+        TE.TOTAL_EMISSIONS,
+        (SE.SECTOR_CO2_EMISSION / TE.TOTAL_EMISSIONS) * 100 AS SECTOR_CONTRIBUTION_PERCENTAGE
+        --SE.SECTOR_CO2_EMISSION - LAG(SE.SECTOR_CO2_EMISSION) OVER (PARTITION BY SE.COUNTRY, SE.SECTOR ORDER BY SE.YEAR) AS PREVIOUS_YEAR_SECTOR_EMISSION
+    FROM
+        SectorEmissions SE
+    JOIN
+        TotalEmissions TE ON SE.COUNTRY = TE.COUNTRY AND SE.YEAR = TE.YEAR
+    ORDER BY
+        SE.COUNTRY,
+        SE.YEAR,
+        SE.SECTOR)
+    SELECT Sector,
+    SECTOR_CONTRIBUTION_PERCENTAGE as sp
+    FROM FinalCte
+    where  country='${selectedCountry}' 
+      AND year = '${selectedYear}'
+      `;
+
+  
+      // Your code to fetch data from Oracle DB using the modified query
+      const connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute(query);
+      await connection.close();
+  
+      res.json(result.rows);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+//Q2
+
 
   app.get('/q2', async (req, res) => {
     try {

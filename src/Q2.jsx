@@ -94,7 +94,7 @@ function Q2() {
   return (
     <main className='main-container'>
       <div className='main-title'>
-        <h3>CO2 Contribution % by  Sector</h3>
+        <h3>CO2 Emission and Population Growth correlation on {selectedCountry} from {selectedStartYear} to {selectedEndYear}</h3>
       </div>
 
       <div className='charts'>

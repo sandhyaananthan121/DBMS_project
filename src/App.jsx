@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Home from './Home';
 import Login from './Login';
+import Q1 from './Q1';
 import Q2 from './Q2';
 import Q3 from './Q3';
 import Q4 from './Q4';
@@ -33,6 +34,15 @@ function App() {
               </div>
             </>
           )} />
+          <Route path="/q1" component={() => (
+              <>
+              <div className='grid-container'>
+                <Header OpenSidebar={OpenSidebar} />
+                <Sidebar openSidebarToggle={openSidebarToggle} OpenSidebar={OpenSidebar} />
+                <Q1 />
+              </div>
+              </>
+            )} />
             
           <Route path="/q2" component={() => (
               <>

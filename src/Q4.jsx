@@ -107,7 +107,7 @@ function Q4() {
   return (
     <main className='main-container'>
       <div className='main-title'>
-        <h3>CO2 Contribution % by  Sector</h3>
+        <h3>Normalized Aggregate rate for CO2 emission taking into account GDP of {selectedCountry} during {selectedStartYear} to {selectedEndYear}</h3>
       </div>
 
       <div className='charts'>

@@ -123,7 +123,7 @@ button {
 
 .sidebar-brand {
   margin-top: 15px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #0056b3;
 }
@@ -135,7 +135,7 @@ button {
 
 .sidebar-list-item {
   padding: 20px 20px 20px 20px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .sidebar-list-item:hover {
@@ -233,6 +233,14 @@ button {
   padding: 10px;
   border-radius: 5px;
   display:block;
+}
+
+
+.custom-legend {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  /* Add other styles as needed */
 }
 
 .form-label {

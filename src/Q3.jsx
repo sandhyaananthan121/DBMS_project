@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 
 
@@ -121,7 +121,7 @@ function Q3() {
   return (
     <main className='main-container'>
       <div className='main-title'>
-        <h3>CO2 Contribution % by  Sector</h3>
+        <h3>CO2 Emission levels affected by Environmental Tax Correlation on {selectedCountry1} and {selectedCountry2}</h3>
       </div>
 
       <div className='charts'>
@@ -141,6 +141,21 @@ function Q3() {
           <XAxis dataKey="year" />
           <YAxis />
           <Tooltip />
+          <Legend
+            payload={[
+              {
+                value: selectedCountry1,
+                type: 'square',
+                color: '#8884d8',
+              },
+              {
+                value: selectedCountry2,
+                type: 'square',
+                color: '#82ca9d',
+              },
+              // Add more legend items for additional countries if needed
+            ]}
+          />
           <Area type="monotone" dataKey="Co2_Tax_correlation_country1" stackId="1" stroke="#8884d8" fill="#8884d8" />
           <Area type="monotone" dataKey="Co2_Tax_correlation_country2" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
         </AreaChart>

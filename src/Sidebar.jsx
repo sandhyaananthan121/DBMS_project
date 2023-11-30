@@ -40,27 +40,32 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
         <ul className='sidebar-list'>
             <li className='sidebar-list-item'>
                 <Link to="/" className="home-link">
-                    <p> CO2 Produced by each sector </p>
+                    <p> CO2 Emission Contribution Percentage in Each Sector</p>
+                </Link>
+            </li>
+            <li className='sidebar-list-item'>
+                <Link to="/q1" className="home-link">
+                    <p> CO2 Produced by each sector during a Time Period</p>
                 </Link>
             </li>
             <li className='sidebar-list-item'>
                 <Link to="/q2" className="home-link">
-                    <p>Co2 vs Greenhouse Gases Produced by each country per sqr fr</p>
+                    <p>CO2 Emission and Population Growth correlation During Given Period</p>
                 </Link>
             </li>
             <li className='sidebar-list-item'>
                 <Link to="/q3" className="home-link">
-                    <p>Co2 Produced By Country In comparision with GDP or Population</p>
+                    <p>CO2 Emission levels affected by Environmental Tax Correlation between two countries on a given period</p>
                 </Link>
             </li>
             <li className='sidebar-list-item'>
                 <Link to="/q4" className="home-link">
-                    <p>Global Surface Temperatures and Co2 Emissions vs Population Growth</p>
+                    <p>Normalized Aggregate rate for CO2 emission taking into account GDP over a period</p>
                 </Link>
             </li>
             <li className='sidebar-list-item'>
                 <Link to="/q5" className="home-link">
-                    <p>Surface Temperature Change in Each Country </p>
+                    <p>Total Co2 Emissions affected by Temperature Range grouped by level of Co2 emission on a country</p>
                 </Link>
             </li>
             <li className='sidebar-list-item'>
