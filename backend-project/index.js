@@ -925,7 +925,7 @@ const db = new sqlite3.Database(dbPath);
 app.get('/total', async (req, res) => {
     // Your code to fetch data from Oracle DB
     //const connection = await oracledb.getConnection(dbConfig);
-    const query = 'select sum(t) from (SELECT count(*) as t from co2_sectorwise union all select count(*) from co2_greenhouse union all select count(*) from envi_co2 union all select count(*) from environmental_tax union all select count(*) from gdp union all select count(*) from gdp_co2 union all select count(*) from landtemp_co2 union all select count(*) from landtempdata union all select count(*) from population union all select count(*) from population_co2)';
+    const query = 'select sum(t) from (SELECT count(*) as t from co2_sectorwise union all select count(*) from co2_greenhouse union all select count(*) from population)';
     db.all(query, (err, rows) => {
       if (err) {
         res.status(500).json({ error: err.message });
