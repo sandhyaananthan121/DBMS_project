@@ -125,7 +125,7 @@ function Home() {
 
   useEffect(() => {
     if (selectedCountry && year) {
-      fetch(`https://climatechangesandhya.onrender.com/q1/side?selectedCountry=${selectedCountry}&selectedYear=${year}`)
+      fetch(`https://climatechangesandhya.onrender.com/q1/side?selectedCountry=${selectedCountry}&selectedYear=2020}`)
         .then((response) => response.json())
         .then((data) => {
           setChartData(transformDataForChart(data));
