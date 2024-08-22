@@ -88,18 +88,7 @@ function Home() {
       console.log(chartData);
   };
 
-  useEffect(() => {
-    if (selectedCountry && sector) {
-      fetch(`https://climatechangesandhya.onrender.com/q1/main?selectedCountry=${selectedCountry}&sector=${sector}`)
-        .then((response) => response.json())
-        .then((data1) => {
-          setChartData1(transformDataForChart1(data1));
-        })
-        .catch((error) => {
-          console.error('Error fetching data:', error);
-        });
-    }
-  }, [selectedCountry, sector]);
+  
 
   const transformDataForChart = (data) => {
     return data.map((item) => ({
@@ -133,6 +122,32 @@ function Home() {
     // Fetch countries when the component mounts
     fetchCountries();
   }, []);
+
+  useEffect(() => {
+    if (selectedCountry && year) {
+      fetch(`https://climatechangesandhya.onrender.com/q1/side?selectedCountry=${selectedCountry}&selectedYear=${year}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setChartData(transformDataForChart(data));
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+    }
+  }, [selectedCountry, year]);
+
+  useEffect(() => {
+    if (selectedCountry && sector) {
+      fetch(`https://climatechangesandhya.onrender.com/q1/main?selectedCountry=${selectedCountry}&sector=${sector}`)
+        .then((response) => response.json())
+        .then((data1) => {
+          setChartData1(transformDataForChart1(data1));
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+    }
+  }, [selectedCountry, sector]);
 
   return (
     <main className='main-container'>
