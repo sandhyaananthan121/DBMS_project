@@ -40,6 +40,9 @@ function Home() {
       const data = await response.json();
       // Assuming data is an array of country names
       setSectors(data);
+      if (data.length > 0) {
+        setSector(data[0]); // Set default value for sector if available
+      }
     } catch (error) {
       console.error('Error fetching sector:', error);
     }
@@ -105,6 +108,9 @@ function Home() {
       const data = await response.json();
       // Assuming data is an array of country names
       setCountries(data);
+      if (data.length > 0) {
+        setCountries(data[0]); // Set default value for sector if available
+      }
     } catch (error) {
       console.error('Error fetching countries:', error);
     }
