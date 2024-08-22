@@ -54,7 +54,7 @@ function Q1() {
   const handleApplyClick = (e) => {
     e.preventDefault();
     // Make an API call with selected data
-    fetch(`http://localhost:3001/q1?selectedCountry=${selectedCountry}&startDate=${startDate}&endDate=${endDate}&sector=${sector}`)
+    fetch(`https://climatechangesandhya.onrender.com/q1?selectedCountry=${selectedCountry}&startDate=${startDate}&endDate=${endDate}&sector=${sector}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
