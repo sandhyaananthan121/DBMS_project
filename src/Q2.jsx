@@ -29,7 +29,7 @@ function Q2() {
   const handleApplyClick = (e) => {
     e.preventDefault();
     // Make an API call with selected data
-    fetch(`http://localhost:3001/q2/main?selectedCountry=${selectedCountry}&selectedStartYear=${selectedStartYear}&selectedEndYear=${selectedEndYear}`)
+    fetch(`https://climatechangesandhya.onrender.com/q2/main?selectedCountry=${selectedCountry}&selectedStartYear=${selectedStartYear}&selectedEndYear=${selectedEndYear}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -54,7 +54,7 @@ function Q2() {
   const fetchYears = async () => {
     let val = 'year'
     try {
-      const response = await fetch(`http://localhost:3001/q2?val=${val}`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q2?val=${val}`);
       if (!response.ok) {
         throw new Error('Failed to fetch years');
       }
@@ -75,7 +75,7 @@ function Q2() {
   const fetchCountries = async () => {
     let val = 'country'
     try {
-      const response = await fetch(`http://localhost:3001/q2?val=${val}`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q2?val=${val}`);
       if (!response.ok) {
         throw new Error('Failed to fetch countries');
       }

@@ -33,7 +33,7 @@ function Home() {
 
   const fetchSector = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/q1/sector`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q1/sector`);
       if (!response.ok) {
         throw new Error('Failed to fetch sectors');
       }
@@ -53,7 +53,7 @@ function Home() {
   const handleApplyClick1 = (e) => {
     e.preventDefault();
     // Make an API call with selected data
-    fetch(`http://localhost:3001/q1/main?selectedCountry=${selectedCountry}&sector=${sector}`)
+    fetch(`https://climatechangesandhya.onrender.com/q1/main?selectedCountry=${selectedCountry}&sector=${sector}`)
       .then((response) => response.json())
       .then((data1) => {
         setChartData1(transformDataForChart1(data1));
@@ -74,7 +74,7 @@ function Home() {
   const handleApplyClick = (e) => {
     e.preventDefault();
     // Make an API call with selected data
-    fetch(`http://localhost:3001/q1/side?selectedCountry=${selectedCountry}&selectedYear=${year}`)
+    fetch(`https://climatechangesandhya.onrender.com/q1/side?selectedCountry=${selectedCountry}&selectedYear=${year}`)
       .then((response) => response.json())
       .then((data) => {
         setChartData(transformDataForChart(data));

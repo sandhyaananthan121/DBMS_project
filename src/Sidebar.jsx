@@ -11,7 +11,7 @@ function Sidebar({openSidebarToggle, OpenSidebar}) {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
 
     const fetchDataFromBackend = () => {
-        fetch('http://localhost:3001/total') // Replace with your actual backend endpoint
+        fetch('https://climatechangesandhya.onrender.com/total') // Replace with your actual backend endpoint
           .then(response => response.json())
           .then(data => {
             setData(data);

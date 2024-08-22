@@ -35,8 +35,8 @@ function Q3() {
     e.preventDefault();
     // Make API calls for both selected countries
     Promise.all([
-      fetch(`http://localhost:3001/q3/main?selectedCountry=${selectedCountry1}&selectedStartYear=${selectedStartYear}&selectedEndYear=${selectedEndYear}`),
-      fetch(`http://localhost:3001/q3/main?selectedCountry=${selectedCountry2}&selectedStartYear=${selectedStartYear}&selectedEndYear=${selectedEndYear}`)
+      fetch(`https://climatechangesandhya.onrender.com/q3/main?selectedCountry=${selectedCountry1}&selectedStartYear=${selectedStartYear}&selectedEndYear=${selectedEndYear}`),
+      fetch(`https://climatechangesandhya.onrender.com/q3/main?selectedCountry=${selectedCountry2}&selectedStartYear=${selectedStartYear}&selectedEndYear=${selectedEndYear}`)
     ])
       .then((responses) => Promise.all(responses.map((response) => response.json())))
       .then((data) => {
@@ -81,7 +81,7 @@ function Q3() {
   const fetchYears = async () => {
     let val = 'year'
     try {
-      const response = await fetch(`http://localhost:3001/q3?val=${val}`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q3?val=${val}`);
       if (!response.ok) {
         throw new Error('Failed to fetch years');
       }
@@ -102,7 +102,7 @@ function Q3() {
   const fetchCountries = async () => {
     let val = 'country'
     try {
-      const response = await fetch(`http://localhost:3001/q3?val=${val}`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q3?val=${val}`);
       if (!response.ok) {
         throw new Error('Failed to fetch countries');
       }

@@ -28,7 +28,7 @@ function Q5() {
   
     Promise.all(
       co2Ranges.map((range) =>
-        fetch(`http://localhost:3001/q5/main?selectedCountry=${selectedCountry}&selectedTempRange=${selectedTempRange}&selectedCo2Range=${range}`)
+        fetch(`https://climatechangesandhya.onrender.com/q5/main?selectedCountry=${selectedCountry}&selectedTempRange=${selectedTempRange}&selectedCo2Range=${range}`)
           .then((response) => response.json())
           .then((data) => ({
             range,
@@ -64,7 +64,7 @@ function Q5() {
   // Fetch countries
   const fetchCountries = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/q5`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q5`);
       if (!response.ok) {
         throw new Error('Failed to fetch countries');
       }

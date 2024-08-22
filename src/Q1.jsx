@@ -30,7 +30,7 @@ function Q1() {
 
   const fetchSector = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/q1/sector`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q1/sector`);
       if (!response.ok) {
         throw new Error('Failed to fetch sectors');
       }
