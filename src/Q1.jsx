@@ -80,7 +80,7 @@ function Q1() {
   // Fetch countries
   const fetchCountries = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/q1/country`);
+      const response = await fetch(`https://climatechangesandhya.onrender.com/q1/country`);
       if (!response.ok) {
         throw new Error('Failed to fetch countries');
       }
