@@ -17,3 +17,6 @@ For backend:
 Now, run the main code in new terminal
 1. #npm install
 2. #npm run dev
+
+Runs on https://climatechangedashboard.onrender.com/
+backend runs on https://climatechangesandhya.onrender.com/
