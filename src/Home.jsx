@@ -111,7 +111,8 @@ function Home() {
       // Assuming data is an array of country names
       setCountries(data);
       if (data.length > 0) {
-        setSelectedCountry(data[0]); // Set default value for country if available
+        setSelectedCountry(data[0]);
+        setSelectedYear('2020'); // Set default value for country if available
       }
     } catch (error) {
       console.error('Error fetching countries:', error);
@@ -125,7 +126,7 @@ function Home() {
 
   useEffect(() => {
     if (selectedCountry && year) {
-      fetch(`https://climatechangesandhya.onrender.com/q1/side?selectedCountry=${selectedCountry}&selectedYear=2020}`)
+      fetch(`https://climatechangesandhya.onrender.com/q1/side?selectedCountry=${selectedCountry}&selectedYear=${year}`)
         .then((response) => response.json())
         .then((data) => {
           setChartData(transformDataForChart(data));
