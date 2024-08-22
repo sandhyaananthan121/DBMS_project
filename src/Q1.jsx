@@ -106,7 +106,7 @@ function Q1() {
   }, []);
 
   useEffect(() => {
-    if (selectedCountry && sector) {
+    if (countries && sector) {
       fetch(`https://climatechangesandhya.onrender.com/q1?selectedCountry=${selectedCountry}&startDate=${startDate}&endDate=${endDate}&sector=${sector}`)
         .then((response) => response.json())
         .then((data) => {
@@ -120,7 +120,7 @@ function Q1() {
         console.log(chartData);
       }
 
-  }, [selectedCountry, sector, startDate, endDate]);
+  }, [countries, sector, startDate, endDate]);
 
   return (
     <main className='main-container'>
