@@ -1368,9 +1368,7 @@ CO2_EMISSION - LAG(CO2_EMISSION) OVER (PARTITION BY COUNTRY ORDER BY YEAR) AS CO
     Population_Growth1 as Population_growth
     FROM RateChange
     where  country=? -- Parameter for selected country
-    AND YEAR BETWEEN ? AND ? -- Parameters for selected year range
-    and PopulationChange<0 -- Filter for negative population change
-    and CO2Change<0 -- Filter for negative CO2 emission change
+    AND YEAR BETWEEN ? AND ?  -- Filter for negative CO2 emission change
     and PopulationChange is NOT NULL -- Ensure non-null population change values
     AND CO2Change IS NOT NULL -- Ensure non-null CO2 emission change values
 
