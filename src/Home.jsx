@@ -109,7 +109,7 @@ function Home() {
       // Assuming data is an array of country names
       setCountries(data);
       if (data.length > 0) {
-        setCountries(data[0]); // Set default value for sector if available
+        setSelectedCountry(data[0]); // Set default value for country if available
       }
     } catch (error) {
       console.error('Error fetching countries:', error);
