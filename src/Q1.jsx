@@ -37,6 +37,9 @@ function Q1() {
       const data = await response.json();
       // Assuming data is an array of country names
       setSectors(data);
+      if (data.length > 0) {
+        setSectors(data[0]);// Set default value for country if available
+      }
     } catch (error) {
       console.error('Error fetching sector:', error);
     }
@@ -87,6 +90,11 @@ function Q1() {
       const data = await response.json();
       // Assuming data is an array of country names
       setCountries(data);
+      if (data.length > 0) {
+        setCountries(data[0]);
+        setStartDate('01-26-2019');
+        setEndDate('01-26-2023');// Set default value for country if available
+      }
     } catch (error) {
       console.error('Error fetching countries:', error);
     }
@@ -96,6 +104,23 @@ function Q1() {
     // Fetch countries when the component mounts
     fetchCountries();
   }, []);
+
+  useEffect(() => {
+    if (selectedCountry && sector) {
+      fetch(`https://climatechangesandhya.onrender.com/q1?selectedCountry=${selectedCountry}&startDate=${startDate}&endDate=${endDate}&sector=${sector}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+          setChartData(transformDataForChart(sortedData));
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+        console.log(chartData);
+      }
+
+  }, [selectedCountry, sector, startDate, endDate]);
 
   return (
     <main className='main-container'>
