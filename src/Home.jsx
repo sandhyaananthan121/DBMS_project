@@ -88,6 +88,19 @@ function Home() {
       console.log(chartData);
   };
 
+  useEffect(() => {
+    if (selectedCountry && sector) {
+      fetch(`https://climatechangesandhya.onrender.com/q1/main?selectedCountry=${selectedCountry}&sector=${sector}`)
+        .then((response) => response.json())
+        .then((data1) => {
+          setChartData1(transformDataForChart1(data1));
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+    }
+  }, [selectedCountry, sector]);
+
   const transformDataForChart = (data) => {
     return data.map((item) => ({
       sector: item[0], // Replace 'date' with your date key
